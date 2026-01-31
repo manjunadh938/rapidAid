@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Responder Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+
+<h2>🚑 Live Emergency Dashboard</h2>
+<div id="map" style="height:500px;"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+fetch("/latest-emergency")
+  .then(res => res.json())
+  .then(data => {
+    if (!data.lat) return;
+
+    const map = L.map('map').setView([data.lat, data.lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    L.marker([data.lat, data.lng]).addTo(map)
+      .bindPopup(`🚨 Emergency<br>📞 ${data.contact}<br>🏥 ${data.hospital}<br>⏰ ${data.time}`)
+      .openPopup();
+  });
+</script>
+
+</body>
+</html>

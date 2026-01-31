@@ -1,0 +1,168 @@
+/* ===== GLOBAL ===== */
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top, #1e2a38, #0b1118 70%);
+  color: white;
+  text-align: center;
+  overflow-x: hidden;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 18px 22px;
+  background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ff4d4d;
+  letter-spacing: 1px;
+}
+
+/* ===== MAIN LAYOUT FIX ===== */
+.main-container {
+  min-height: 100vh;
+  width: 100%;
+  padding: 30px 20px 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* ===== SOS BUTTON ===== */
+.sos-button {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff6666, #cc0000);
+  border: none;
+  color: white;
+  font-size: 30px;
+  font-weight: bold;
+  box-shadow: 0 0 25px rgba(255, 0, 0, 0.8), 0 0 60px rgba(255, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.3s ease;
+  margin-top: 25px;
+}
+
+.sos-button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 40px rgba(255, 0, 0, 1), 0 0 90px rgba(255, 0, 0, 0.5);
+}
+
+@keyframes flash {
+  0% { box-shadow: 0 0 20px red; }
+  50% { box-shadow: 0 0 60px red; }
+  100% { box-shadow: 0 0 20px red; }
+}
+
+.sos-button.active {
+  animation: flash 1s infinite;
+}
+
+/* ===== CONTACT INPUT ===== */
+input {
+  padding: 12px;
+  width: 85%;
+  max-width: 350px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 12px;
+  font-size: 16px;
+  background: #1f2b38;
+  color: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+/* ===== FIRST AID CARDS ===== */
+.card-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.card {
+  width: 120px;
+  padding: 15px;
+  background: linear-gradient(145deg, #1c2530, #2b3a4a);
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.7);
+}
+
+.card:nth-child(1) { border-bottom: 3px solid #ff4d4d; }
+.card:nth-child(2) { border-bottom: 3px solid #ffae00; }
+.card:nth-child(3) { border-bottom: 3px solid #00c2ff; }
+
+/* ===== HELP BOX ===== */
+.help-box {
+  margin: 25px auto;
+  padding: 16px;
+  width: 92%;
+  max-width: 520px;
+  background: linear-gradient(145deg, #141c24, #1f2b36);
+  border-radius: 12px;
+  text-align: left;
+  line-height: 1.6;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
+}
+
+/* ===== FLOATING CALL BUTTON ===== */
+.call-fab {
+  position: fixed;
+  bottom: 22px;
+  left: 22px;
+  background: linear-gradient(145deg, #25d366, #1da851);
+  color: white;
+  font-size: 28px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  box-shadow: 0 0 20px rgba(37,211,102,0.8);
+  transition: transform 0.2s ease;
+  z-index: 999;
+}
+
+.call-fab:hover {
+  transform: scale(1.15);
+}
+
+/* ===== TITLES ===== */
+h3 {
+  color: #ff4d4d;
+  margin-top: 30px;
+  letter-spacing: 1px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .sos-button {
+    width: 140px;
+    height: 140px;
+    font-size: 24px;
+  }
+
+  .card {
+    width: 100px;
+    padding: 12px;
+  }
+}

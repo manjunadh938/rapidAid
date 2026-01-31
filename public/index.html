@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RapidAid Emergency</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">🚑 RapidAid Emergency</div>
+</div>
+
+<main class="main-container">
+
+  <input type="tel" id="contactNumber" placeholder="Emergency WhatsApp number" />
+
+  <button class="sos-button" id="sosBtn">SOS</button>
+
+  <h3>Immediate First Aid</h3>
+
+  <div class="card-row">
+    <div class="card" onclick="showHelp('cpr')">❤️ CPR</div>
+    <div class="card" onclick="showHelp('bleeding')">🩸 Bleeding</div>
+    <div class="card" onclick="showHelp('unconscious')">😵 Unconscious</div>
+  </div>
+
+  <div class="help-box" id="helpBox"></div>
+
+</main>
+
+<a id="callBtn" class="call-fab" href="#">📞</a>
+
+<audio id="siren" src="https://actions.google.com/sounds/v1/alarms/siren_whistle.ogg"></audio>
+
+<script>
+// Load saved contact automatically
+window.addEventListener("load", () => {
+  const saved = localStorage.getItem("emergencyContact");
+  if (saved) document.getElementById("contactNumber").value = saved;
+});
+
+// SOS button click
+document.getElementById("sosBtn").addEventListener("click", () => {
+  const contact = document.getElementById("contactNumber").value;
+  if (!contact) return alert("Enter emergency contact number");
+
+  localStorage.setItem("emergencyContact", contact);
+
+  navigator.geolocation.getCurrentPosition(position => {
+    fetch("/sos", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        contact: contact,
+        type: "General Emergency"
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.querySelector(".sos-button").classList.add("active");
+      document.getElementById("siren").play();
+
+      const mapLink = `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+      const message = `🚨 EMERGENCY ALERT 🚨\nLive Location: ${mapLink}\nHospital: ${data.hospital}`;
+      const whatsappURL = `https://wa.me/${contact.replace(/[^0-9]/g,"")}?text=${encodeURIComponent(message)}`;
+
+      window.open(whatsappURL, "_blank");
+      document.getElementById("callBtn").href = `tel:${contact}`;
+    });
+  });
+});
+
+// First aid help
+function showHelp(type) {
+  const help = {
+    cpr: `
+<b>🫀 CPR (Cardiopulmonary Resuscitation)</b><br><br>
+1️⃣ Check if the person is responsive. Shake gently and shout.<br>
+2️⃣ Call emergency services immediately.<br>
+3️⃣ Place the person on their back on a firm surface.<br>
+4️⃣ Put one hand on the center of the chest, other on top.<br>
+5️⃣ Push hard and fast (100–120 compressions per minute).<br>
+6️⃣ Let chest fully rise between compressions.<br>
+7️⃣ If trained, give 2 rescue breaths after every 30 compressions.<br>
+⚠️ Continue until medical help arrives or person starts breathing.
+`,
+    bleeding: `
+<b>🩸 Severe Bleeding Control</b><br><br>
+1️⃣ Stay calm and make the person lie down.<br>
+2️⃣ Apply firm, direct pressure using cloth or bandage.<br>
+3️⃣ Do NOT remove objects stuck in wounds — press around them.<br>
+4️⃣ Raise the injured area above heart level if possible.<br>
+5️⃣ If blood soaks through, place another cloth on top — don’t remove first one.<br>
+6️⃣ Watch for signs of shock (pale skin, fast breathing).<br>
+⚠️ Keep pressure until emergency help arrives.
+`,
+    unconscious: `
+<b>😵 Unconscious Person Care</b><br><br>
+1️⃣ Check breathing and pulse immediately.<br>
+2️⃣ If not breathing → start CPR.<br>
+3️⃣ If breathing → place in recovery position (on their side).<br>
+4️⃣ Loosen tight clothing.<br>
+5️⃣ Do NOT give food or water.<br>
+6️⃣ Keep the person warm and monitor breathing.<br>
+⚠️ Call emergency services right away.
+`
+  };
+
+  document.getElementById("helpBox").innerHTML = help[type];
+}
+</script>
+
+</body>
+</html>
