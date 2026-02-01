@@ -46,14 +46,20 @@
 
 </main>
 
+<!-- CALL BUTTONS -->
 <a id="callBtn" class="call-fab" href="#">📞</a>
 <a class="ambulance-fab" href="tel:108">🚑</a>
+
 <audio id="siren" src="https://actions.google.com/sounds/v1/alarms/siren_whistle.ogg"></audio>
 
 <script>
+/* ========== LOAD SAVED USER DETAILS ========== */
 window.addEventListener("load", () => {
-  const saved = localStorage.getItem("emergencyContact");
-  if (saved) document.getElementById("contactNumber").value = saved;
+  const savedContact = localStorage.getItem("emergencyContact");
+  const savedName = localStorage.getItem("userName");
+
+  if (savedContact) document.getElementById("contactNumber").value = savedContact;
+  if (savedName) document.getElementById("userName").value = savedName;
 });
 
 /* ================= EMERGENCY MODE ================= */
@@ -91,7 +97,10 @@ function sendSOS() {
 
   if (!contact) return alert("Enter emergency contact number");
 
+  // Save for next time
   localStorage.setItem("emergencyContact", contact);
+  localStorage.setItem("userName", name);
+
   document.getElementById("statusBox").innerText = "📍 Getting Location...";
 
   navigator.geolocation.getCurrentPosition(position => {
@@ -143,49 +152,24 @@ if (SpeechRecognition) {
 }
 
 /* ================= FIRST AID ================= */
-
 function showHelp(type) {
   const help = {
-    cpr: `
-<b>🫀 CPR (Cardiopulmonary Resuscitation)</b><br><br>
-
-1️⃣ Check if the person responds — tap and shout loudly.<br>
-2️⃣ Call emergency services immediately or ask someone nearby.<br>
-3️⃣ Place the person flat on their back on a firm surface.<br>
-4️⃣ Kneel beside them and place the heel of one hand in the center of the chest.<br>
-5️⃣ Place your other hand on top and interlock fingers.<br>
-6️⃣ Keep arms straight and push hard and fast (100–120 compressions per minute).<br>
-7️⃣ Push at least 2 inches deep and allow the chest to rise fully between pushes.<br>
-8️⃣ After 30 compressions, if trained, give 2 rescue breaths.<br>
-9️⃣ Continue CPR until medical help arrives or the person starts breathing.<br>
-⚠️ Do NOT stop unless exhausted or professionals take over.
-`,
-
-    bleeding: `
-<b>🩸 Severe Bleeding Control</b><br><br>
-
-1️⃣ Make the person lie down to prevent fainting.<br>
-2️⃣ Apply firm, direct pressure on the wound using cloth or bandage.<br>
-3️⃣ If an object is stuck, DO NOT remove it — press around it.<br>
-4️⃣ Raise the injured area above heart level if possible.<br>
-5️⃣ If blood soaks through, place another cloth on top — don’t remove the first.<br>
-6️⃣ Keep pressure steady until emergency help arrives.<br>
-7️⃣ Watch for shock signs: pale skin, fast breathing, dizziness.<br>
-⚠️ Keep the person warm and calm while waiting for help.
-`,
-
-    unconscious: `
-<b>😵 Unconscious Person Care</b><br><br>
-
-1️⃣ Check breathing and pulse immediately.<br>
-2️⃣ If not breathing → begin CPR immediately.<br>
-3️⃣ If breathing, place them in the recovery position (on their side).<br>
-4️⃣ Tilt the head slightly back to keep airway open.<br>
-5️⃣ Loosen tight clothing around neck or chest.<br>
-6️⃣ Do NOT give food, water, or medicine.<br>
-7️⃣ Monitor breathing until help arrives.<br>
-⚠️ Call emergency services as soon as possible.
-`
+    cpr: `<b>🫀 CPR (Cardiopulmonary Resuscitation)</b><br><br>
+1️⃣ Check responsiveness and breathing.<br>
+2️⃣ Call emergency services immediately.<br>
+3️⃣ Push hard & fast (100–120/min).<br>
+4️⃣ 30 compressions + 2 breaths if trained.<br>
+⚠️ Continue until help arrives.`,
+    bleeding: `<b>🩸 Severe Bleeding</b><br><br>
+1️⃣ Apply firm pressure on wound.<br>
+2️⃣ Raise injured area if possible.<br>
+3️⃣ Do not remove embedded objects.<br>
+⚠️ Keep pressure until help arrives.`,
+    unconscious: `<b>😵 Unconscious Person</b><br><br>
+1️⃣ Check breathing.<br>
+2️⃣ If breathing → recovery position.<br>
+3️⃣ If not → start CPR.<br>
+⚠️ Do not give food or water.`
   };
 
   document.getElementById("helpBox").innerHTML = help[type];

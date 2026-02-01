@@ -15,7 +15,10 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: linear-gradient(
+    rgba(0, 0, 0, 0.78),
+    rgba(0, 0, 0, 0.82)
+  );
   z-index: -1;
 }
 
@@ -206,16 +209,27 @@ input {
 
 /* ===== TITLES ===== */
 h3 {
-  color: #ff4d4d;
-  margin-top: 30px;
+  color: #0b6623; /* Dark Green */
+  margin-top: 34px;
+  font-size: 24px;      /* Bigger heading */
+  font-weight: 700;     /* Strong emphasis */
+  letter-spacing: 0.8px;
+  text-transform: uppercase; /* Makes it look like section titles */
 }
+
+
 
 /* ===== MOBILE ===== */
 @media (max-width: 600px) {
   .sos-button { width: 140px; height: 140px; font-size: 24px; }
   .card { width: 100px; }
   .team-logo { height: 45px; }
+
+  h3 {
+    font-size: 20px; /* Slightly smaller on mobile */
+  }
 }
+
 /* ===== AMBULANCE CALL BUTTON ===== */
 .ambulance-fab {
   position: fixed;
@@ -238,5 +252,8 @@ h3 {
 
 .ambulance-fab:hover {
   transform: scale(1.15);
+}
+body {
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
 }
 
