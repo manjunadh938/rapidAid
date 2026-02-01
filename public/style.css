@@ -209,13 +209,14 @@ input {
 
 /* ===== TITLES ===== */
 h3 {
-  color: #0b6623; /* Dark Green */
+  color: #00e5ff; /* Cyan */
   margin-top: 34px;
-  font-size: 24px;      /* Bigger heading */
-  font-weight: 700;     /* Strong emphasis */
+  font-size: 24px;
+  font-weight: 700;
   letter-spacing: 0.8px;
-  text-transform: uppercase; /* Makes it look like section titles */
+  text-transform: uppercase;
 }
+
 
 
 
@@ -226,9 +227,10 @@ h3 {
   .team-logo { height: 45px; }
 
   h3 {
-    font-size: 20px; /* Slightly smaller on mobile */
+    font-size: 20px;
   }
 }
+
 
 /* ===== AMBULANCE CALL BUTTON ===== */
 .ambulance-fab {
