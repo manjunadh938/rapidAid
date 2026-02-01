@@ -9,7 +9,9 @@ app.use(express.static("public"));
 
 const db = new sqlite3.Database("./emergency.db");
 
-// Simulated hospitals
+/* -----------------------------
+   SIMULATED HOSPITAL DATABASE
+------------------------------*/
 const hospitals = [
   { name: "City General Hospital", lat: 17.3850, lng: 78.4867 },
   { name: "Apollo Emergency Care", lat: 17.4065, lng: 78.4772 },
@@ -31,7 +33,9 @@ function getNearestHospital(userLat, userLng) {
   return nearest.name;
 }
 
-// Create table with more useful fields
+/* -----------------------------
+   DATABASE TABLE (SIMPLIFIED)
+------------------------------*/
 db.run(`CREATE TABLE IF NOT EXISTS emergencies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     lat REAL,
@@ -39,36 +43,218 @@ db.run(`CREATE TABLE IF NOT EXISTS emergencies (
     time TEXT,
     status TEXT,
     contact TEXT,
-    hospital TEXT,
-    type TEXT
+    name TEXT,
+    hospital TEXT
 )`);
 
-// SOS API
+/* -----------------------------
+   SOS API
+------------------------------*/
 app.post("/sos", (req, res) => {
-    const { lat, lng, contact, type } = req.body;
+    const { lat, lng, contact, name } = req.body;
+
+    if (!lat || !lng || !contact) {
+        return res.status(400).json({ error: "Missing required emergency data" });
+    }
+
     const time = new Date().toLocaleString();
     const hospital = getNearestHospital(lat, lng);
 
     db.run(
-        "INSERT INTO emergencies (lat, lng, time, status, contact, hospital, type) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [lat, lng, time, "AMBULANCE_DISPATCHED", contact, hospital, type || "Unknown"]
-    );
+        `INSERT INTO emergencies 
+        (lat, lng, time, status, contact, name, hospital) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [lat, lng, time, "SOS_SENT", contact, name || "Unknown", hospital],
+        function(err) {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Database insert failed" });
+            }
 
-    res.json({ hospital });
+            res.json({
+                message: "Emergency recorded",
+                hospital: hospital,
+                id: this.lastID
+            });
+        }
+    );
 });
 
-// Get latest emergency
+/* -----------------------------
+   GET LATEST EMERGENCY
+------------------------------*/
 app.get("/latest-emergency", (req, res) => {
     db.get("SELECT * FROM emergencies ORDER BY id DESC LIMIT 1", (err, row) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Database read failed" });
+        }
         res.json(row || {});
     });
 });
 
-// Mark emergency as resolved
-app.post("/resolve", (req, res) => {
-    db.run("UPDATE emergencies SET status = 'RESOLVED' WHERE id = (SELECT id FROM emergencies ORDER BY id DESC LIMIT 1)");
-    res.json({ message: "Emergency marked as resolved" });
+/* -----------------------------
+   UPDATE STATUS (TIMELINE)
+------------------------------*/
+app.post("/update-status", (req, res) => {
+    const { status } = req.body;
+    if (!status) return res.status(400).json({ error: "Status required" });
+
+    db.run(
+        "UPDATE emergencies SET status = ? WHERE id = (SELECT id FROM emergencies ORDER BY id DESC LIMIT 1)",
+        [status],
+        (err) => {
+            if (err) return res.status(500).json({ error: "Status update failed" });
+            res.json({ message: "Status updated" });
+        }
+    );
 });
 
+/* -----------------------------
+   MARK EMERGENCY RESOLVED
+------------------------------*/
+app.post("/resolve", (req, res) => {
+    db.run(
+        "UPDATE emergencies SET status = 'RESOLVED' WHERE id = (SELECT id FROM emergencies ORDER BY id DESC LIMIT 1)",
+        (err) => {
+            if (err) return res.status(500).json({ error: "Resolve failed" });
+            res.json({ message: "Emergency marked as resolved" });
+        }
+    );
+});
+
+/* -----------------------------
+   SERVER START
+------------------------------*/
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚑 RapidAid Server running on port ${PORT}`));
+const express = require("express");
+const sqlite3 = require("sqlite3").verbose();
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static("public"));
+
+const db = new sqlite3.Database("./emergency.db");
+
+/* -----------------------------
+   SIMULATED HOSPITAL DATABASE
+------------------------------*/
+const hospitals = [
+  { name: "City General Hospital", lat: 17.3850, lng: 78.4867 },
+  { name: "Apollo Emergency Care", lat: 17.4065, lng: 78.4772 },
+  { name: "Sunrise Trauma Center", lat: 17.3721, lng: 78.4910 }
+];
+
+function getNearestHospital(userLat, userLng) {
+  let nearest = hospitals[0];
+  let minDist = Number.MAX_VALUE;
+
+  hospitals.forEach(h => {
+    const dist = Math.sqrt((userLat - h.lat)**2 + (userLng - h.lng)**2);
+    if (dist < minDist) {
+      minDist = dist;
+      nearest = h;
+    }
+  });
+
+  return nearest.name;
+}
+
+/* -----------------------------
+   DATABASE TABLE (SIMPLIFIED)
+------------------------------*/
+db.run(`CREATE TABLE IF NOT EXISTS emergencies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lat REAL,
+    lng REAL,
+    time TEXT,
+    status TEXT,
+    contact TEXT,
+    name TEXT,
+    hospital TEXT
+)`);
+
+/* -----------------------------
+   SOS API
+------------------------------*/
+app.post("/sos", (req, res) => {
+    const { lat, lng, contact, name } = req.body;
+
+    if (!lat || !lng || !contact) {
+        return res.status(400).json({ error: "Missing required emergency data" });
+    }
+
+    const time = new Date().toLocaleString();
+    const hospital = getNearestHospital(lat, lng);
+
+    db.run(
+        `INSERT INTO emergencies 
+        (lat, lng, time, status, contact, name, hospital) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [lat, lng, time, "SOS_SENT", contact, name || "Unknown", hospital],
+        function(err) {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Database insert failed" });
+            }
+
+            res.json({
+                message: "Emergency recorded",
+                hospital: hospital,
+                id: this.lastID
+            });
+        }
+    );
+});
+
+/* -----------------------------
+   GET LATEST EMERGENCY
+------------------------------*/
+app.get("/latest-emergency", (req, res) => {
+    db.get("SELECT * FROM emergencies ORDER BY id DESC LIMIT 1", (err, row) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Database read failed" });
+        }
+        res.json(row || {});
+    });
+});
+
+/* -----------------------------
+   UPDATE STATUS (TIMELINE)
+------------------------------*/
+app.post("/update-status", (req, res) => {
+    const { status } = req.body;
+    if (!status) return res.status(400).json({ error: "Status required" });
+
+    db.run(
+        "UPDATE emergencies SET status = ? WHERE id = (SELECT id FROM emergencies ORDER BY id DESC LIMIT 1)",
+        [status],
+        (err) => {
+            if (err) return res.status(500).json({ error: "Status update failed" });
+            res.json({ message: "Status updated" });
+        }
+    );
+});
+
+/* -----------------------------
+   MARK EMERGENCY RESOLVED
+------------------------------*/
+app.post("/resolve", (req, res) => {
+    db.run(
+        "UPDATE emergencies SET status = 'RESOLVED' WHERE id = (SELECT id FROM emergencies ORDER BY id DESC LIMIT 1)",
+        (err) => {
+            if (err) return res.status(500).json({ error: "Resolve failed" });
+            res.json({ message: "Emergency marked as resolved" });
+        }
+    );
+});
+
+/* -----------------------------
+   SERVER START
+------------------------------*/
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚑 RapidAid Server running on port ${PORT}`));

@@ -8,15 +8,31 @@
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
-  <div class="logo">🚑 RapidAid Emergency</div>
+  <img src="logo.jpeg" class="team-logo">
+  <div class="logo">RapidAid Emergency</div>
+</div>
+
+<!-- LOCK SCREEN -->
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-content">
+    🚨 EMERGENCY MODE ACTIVE 🚨
+    <button id="cancelSOS" class="cancel-btn">Cancel Emergency</button>
+  </div>
 </div>
 
 <main class="main-container">
 
-  <input type="tel" id="contactNumber" placeholder="Emergency WhatsApp number" />
+  <h3>User Details</h3>
+  <input type="text" id="userName" placeholder="Your Name" />
+  <input type="tel" id="contactNumber" placeholder="Emergency Phone Number" />
 
-  <button class="sos-button" id="sosBtn">SOS</button>
+  <button class="sos-button pulse" id="sosBtn">SOS</button>
+  <button class="card voice-btn" id="voiceSOS">🎤 Voice SOS</button>
+
+  <div id="statusBox" class="status-box">🟢 GPS Ready</div>
+  <div id="timerBox" class="timer-box"></div>
 
   <h3>Immediate First Aid</h3>
 
@@ -31,88 +47,149 @@
 </main>
 
 <a id="callBtn" class="call-fab" href="#">📞</a>
-
+<a class="ambulance-fab" href="tel:108">🚑</a>
 <audio id="siren" src="https://actions.google.com/sounds/v1/alarms/siren_whistle.ogg"></audio>
 
 <script>
-// Load saved contact automatically
 window.addEventListener("load", () => {
   const saved = localStorage.getItem("emergencyContact");
   if (saved) document.getElementById("contactNumber").value = saved;
 });
 
-// SOS button click
-document.getElementById("sosBtn").addEventListener("click", () => {
+/* ================= EMERGENCY MODE ================= */
+function activateEmergencyMode() {
+  document.getElementById("lockScreen").style.display = "flex";
+  document.querySelector(".sos-button").classList.add("active");
+  document.getElementById("siren").play();
+}
+
+function deactivateEmergencyMode() {
+  document.getElementById("lockScreen").style.display = "none";
+  document.querySelector(".sos-button").classList.remove("active");
+  document.getElementById("siren").pause();
+  document.getElementById("siren").currentTime = 0;
+  fetch("/resolve", { method: "POST" });
+}
+
+document.getElementById("cancelSOS").addEventListener("click", deactivateEmergencyMode);
+document.getElementById("sosBtn").addEventListener("click", sendSOS);
+
+/* ================= TIMER ================= */
+let seconds = 0;
+setInterval(() => {
+  if (document.getElementById("lockScreen").style.display === "flex") {
+    seconds++;
+    document.getElementById("timerBox").innerText =
+      "⏱ Emergency Active: " + seconds + " sec";
+  }
+}, 1000);
+
+/* ================= SOS FUNCTION ================= */
+function sendSOS() {
   const contact = document.getElementById("contactNumber").value;
+  const name = document.getElementById("userName").value;
+
   if (!contact) return alert("Enter emergency contact number");
 
   localStorage.setItem("emergencyContact", contact);
+  document.getElementById("statusBox").innerText = "📍 Getting Location...";
 
   navigator.geolocation.getCurrentPosition(position => {
+    document.getElementById("statusBox").innerText = "🟢 Location Shared";
+
     fetch("/sos", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
         lat: position.coords.latitude,
         lng: position.coords.longitude,
-        contact: contact,
-        type: "General Emergency"
+        contact,
+        name
       })
     })
     .then(res => res.json())
     .then(data => {
-      document.querySelector(".sos-button").classList.add("active");
-      document.getElementById("siren").play();
+      activateEmergencyMode();
 
       const mapLink = `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
-      const message = `🚨 EMERGENCY ALERT 🚨\nLive Location: ${mapLink}\nHospital: ${data.hospital}`;
-      const whatsappURL = `https://wa.me/${contact.replace(/[^0-9]/g,"")}?text=${encodeURIComponent(message)}`;
+      const message = `🚨 EMERGENCY ALERT 🚨
+Name: ${name}
+Live Location: ${mapLink}
+Nearest Hospital: ${data.hospital}`;
 
-      window.open(whatsappURL, "_blank");
+      window.open(`https://wa.me/${contact.replace(/[^0-9]/g,"")}?text=${encodeURIComponent(message)}`, "_blank");
       document.getElementById("callBtn").href = `tel:${contact}`;
     });
   });
-});
+}
 
-// First aid help
+/* ================= VOICE SOS ================= */
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+
+  document.getElementById("voiceSOS").onclick = () => {
+    recognition.start();
+    alert("Listening for 'help'...");
+  };
+
+  recognition.onresult = (event) => {
+    if (event.results[event.results.length - 1][0].transcript.toLowerCase().includes("help")) {
+      sendSOS();
+      recognition.stop();
+    }
+  };
+}
+
+/* ================= FIRST AID ================= */
+
 function showHelp(type) {
   const help = {
     cpr: `
 <b>🫀 CPR (Cardiopulmonary Resuscitation)</b><br><br>
-1️⃣ Check if the person is responsive. Shake gently and shout.<br>
-2️⃣ Call emergency services immediately.<br>
-3️⃣ Place the person on their back on a firm surface.<br>
-4️⃣ Put one hand on the center of the chest, other on top.<br>
-5️⃣ Push hard and fast (100–120 compressions per minute).<br>
-6️⃣ Let chest fully rise between compressions.<br>
-7️⃣ If trained, give 2 rescue breaths after every 30 compressions.<br>
-⚠️ Continue until medical help arrives or person starts breathing.
+
+1️⃣ Check if the person responds — tap and shout loudly.<br>
+2️⃣ Call emergency services immediately or ask someone nearby.<br>
+3️⃣ Place the person flat on their back on a firm surface.<br>
+4️⃣ Kneel beside them and place the heel of one hand in the center of the chest.<br>
+5️⃣ Place your other hand on top and interlock fingers.<br>
+6️⃣ Keep arms straight and push hard and fast (100–120 compressions per minute).<br>
+7️⃣ Push at least 2 inches deep and allow the chest to rise fully between pushes.<br>
+8️⃣ After 30 compressions, if trained, give 2 rescue breaths.<br>
+9️⃣ Continue CPR until medical help arrives or the person starts breathing.<br>
+⚠️ Do NOT stop unless exhausted or professionals take over.
 `,
+
     bleeding: `
 <b>🩸 Severe Bleeding Control</b><br><br>
-1️⃣ Stay calm and make the person lie down.<br>
-2️⃣ Apply firm, direct pressure using cloth or bandage.<br>
-3️⃣ Do NOT remove objects stuck in wounds — press around them.<br>
+
+1️⃣ Make the person lie down to prevent fainting.<br>
+2️⃣ Apply firm, direct pressure on the wound using cloth or bandage.<br>
+3️⃣ If an object is stuck, DO NOT remove it — press around it.<br>
 4️⃣ Raise the injured area above heart level if possible.<br>
-5️⃣ If blood soaks through, place another cloth on top — don’t remove first one.<br>
-6️⃣ Watch for signs of shock (pale skin, fast breathing).<br>
-⚠️ Keep pressure until emergency help arrives.
+5️⃣ If blood soaks through, place another cloth on top — don’t remove the first.<br>
+6️⃣ Keep pressure steady until emergency help arrives.<br>
+7️⃣ Watch for shock signs: pale skin, fast breathing, dizziness.<br>
+⚠️ Keep the person warm and calm while waiting for help.
 `,
+
     unconscious: `
 <b>😵 Unconscious Person Care</b><br><br>
+
 1️⃣ Check breathing and pulse immediately.<br>
-2️⃣ If not breathing → start CPR.<br>
-3️⃣ If breathing → place in recovery position (on their side).<br>
-4️⃣ Loosen tight clothing.<br>
-5️⃣ Do NOT give food or water.<br>
-6️⃣ Keep the person warm and monitor breathing.<br>
-⚠️ Call emergency services right away.
+2️⃣ If not breathing → begin CPR immediately.<br>
+3️⃣ If breathing, place them in the recovery position (on their side).<br>
+4️⃣ Tilt the head slightly back to keep airway open.<br>
+5️⃣ Loosen tight clothing around neck or chest.<br>
+6️⃣ Do NOT give food, water, or medicine.<br>
+7️⃣ Monitor breathing until help arrives.<br>
+⚠️ Call emergency services as soon as possible.
 `
   };
 
   document.getElementById("helpBox").innerHTML = help[type];
 }
 </script>
-
 </body>
 </html>

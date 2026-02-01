@@ -3,71 +3,53 @@ html, body {
   margin: 0;
   height: 100%;
   font-family: 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top, #1e2a38, #0b1118 70%);
   color: white;
   text-align: center;
   overflow-x: hidden;
+  background: url("background.jpeg") no-repeat center center fixed;
+  background-size: cover;
+}
+
+/* Dark overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: -1;
 }
 
 /* ===== HEADER ===== */
 .header {
   display: flex;
   justify-content: space-between;
-  padding: 18px 22px;
+  align-items: center;
+  padding: 14px 18px;
   background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
   box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+.team-logo {
+  height: 55px;
+  object-fit: contain;
 }
 
 .logo {
   font-size: 20px;
   font-weight: bold;
   color: #ff4d4d;
-  letter-spacing: 1px;
 }
 
-/* ===== MAIN LAYOUT FIX ===== */
+/* ===== MAIN ===== */
 .main-container {
   min-height: 100vh;
-  width: 100%;
-  padding: 30px 20px 120px;
+  padding: 20px 20px 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
 }
 
-/* ===== SOS BUTTON ===== */
-.sos-button {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #ff6666, #cc0000);
-  border: none;
-  color: white;
-  font-size: 30px;
-  font-weight: bold;
-  box-shadow: 0 0 25px rgba(255, 0, 0, 0.8), 0 0 60px rgba(255, 0, 0, 0.4);
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.3s ease;
-  margin-top: 25px;
-}
-
-.sos-button:hover {
-  transform: scale(1.08);
-  box-shadow: 0 0 40px rgba(255, 0, 0, 1), 0 0 90px rgba(255, 0, 0, 0.5);
-}
-
-@keyframes flash {
-  0% { box-shadow: 0 0 20px red; }
-  50% { box-shadow: 0 0 60px red; }
-  100% { box-shadow: 0 0 20px red; }
-}
-
-.sos-button.active {
-  animation: flash 1s infinite;
-}
-
-/* ===== CONTACT INPUT ===== */
+/* ===== INPUTS ===== */
 input {
   padding: 12px;
   width: 85%;
@@ -81,7 +63,63 @@ input {
   box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
-/* ===== FIRST AID CARDS ===== */
+/* ===== SOS BUTTON ===== */
+.sos-button {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff6666, #cc0000);
+  border: none;
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+  box-shadow: 0 0 30px rgba(255,0,0,0.9);
+  cursor: pointer;
+  margin-top: 25px;
+  transition: transform 0.2s ease;
+}
+
+.sos-button:hover { transform: scale(1.08); }
+
+.pulse { animation: pulseGlow 2s infinite; }
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 20px red; }
+  50% { box-shadow: 0 0 60px red; }
+  100% { box-shadow: 0 0 20px red; }
+}
+
+.sos-button.active { animation: flash 1s infinite; }
+@keyframes flash {
+  0% { box-shadow: 0 0 20px red; }
+  50% { box-shadow: 0 0 70px red; }
+  100% { box-shadow: 0 0 20px red; }
+}
+
+/* ===== VOICE BUTTON ===== */
+.voice-btn {
+  margin-top: 12px;
+  padding: 12px 18px;
+  background: linear-gradient(145deg, #2c5364, #1e2a38);
+  color: white;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.voice-btn:hover { transform: scale(1.08); }
+
+/* ===== STATUS & TIMER ===== */
+.status-box, .timer-box {
+  margin-top: 10px;
+  font-size: 15px;
+  background: rgba(0,0,0,0.45);
+  padding: 8px 14px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.4);
+}
+
+/* ===== CARDS ===== */
 .card-row {
   display: flex;
   justify-content: center;
@@ -99,15 +137,10 @@ input {
   box-shadow: 0 6px 12px rgba(0,0,0,0.5);
   transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
-
 .card:hover {
   transform: translateY(-5px) scale(1.05);
   box-shadow: 0 8px 18px rgba(0,0,0,0.7);
 }
-
-.card:nth-child(1) { border-bottom: 3px solid #ff4d4d; }
-.card:nth-child(2) { border-bottom: 3px solid #ffae00; }
-.card:nth-child(3) { border-bottom: 3px solid #00c2ff; }
 
 /* ===== HELP BOX ===== */
 .help-box {
@@ -119,10 +152,9 @@ input {
   border-radius: 12px;
   text-align: left;
   line-height: 1.6;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
 }
 
-/* ===== FLOATING CALL BUTTON ===== */
+/* ===== CALL FAB ===== */
 .call-fab {
   position: fixed;
   bottom: 22px;
@@ -138,31 +170,73 @@ input {
   align-items: center;
   text-decoration: none;
   box-shadow: 0 0 20px rgba(37,211,102,0.8);
-  transition: transform 0.2s ease;
   z-index: 999;
 }
 
-.call-fab:hover {
-  transform: scale(1.15);
+/* ===== LOCK SCREEN ===== */
+.lock-screen {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.lock-content {
+  text-align: center;
+  font-size: 26px;
+  color: red;
+}
+
+.cancel-btn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(145deg, #444, #222);
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+.cancel-btn:hover {
+  background: linear-gradient(145deg, #ff4d4d, #990000);
 }
 
 /* ===== TITLES ===== */
 h3 {
   color: #ff4d4d;
   margin-top: 30px;
-  letter-spacing: 1px;
 }
 
-/* ===== RESPONSIVE ===== */
+/* ===== MOBILE ===== */
 @media (max-width: 600px) {
-  .sos-button {
-    width: 140px;
-    height: 140px;
-    font-size: 24px;
-  }
-
-  .card {
-    width: 100px;
-    padding: 12px;
-  }
+  .sos-button { width: 140px; height: 140px; font-size: 24px; }
+  .card { width: 100px; }
+  .team-logo { height: 45px; }
 }
+/* ===== AMBULANCE CALL BUTTON ===== */
+.ambulance-fab {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  background: linear-gradient(145deg, #ff4d4d, #b30000);
+  color: white;
+  font-size: 26px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  box-shadow: 0 0 20px rgba(255,0,0,0.8);
+  z-index: 999;
+  transition: transform 0.2s ease;
+}
+
+.ambulance-fab:hover {
+  transform: scale(1.15);
+}
+
